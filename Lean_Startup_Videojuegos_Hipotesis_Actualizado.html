@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<title>Lean y Lean Startup | Proyecto Integrador: videojuego</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+  body { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); overflow: hidden; height: 100vh; }
+
+  .presentation { width: 100vw; height: 100vh; position: relative; }
+
+  .slide {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    display: none; flex-direction: column; justify-content: center; align-items: center;
+    padding: 20px; opacity: 0; transition: opacity 0.5s ease;
+  }
+  .slide.active { display: flex; opacity: 1; }
+
+  /* Portada y cierre */
+  .slide-1 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); text-align: center; color: white; }
+  .slide-1 h1 { font-size: 3.5em; margin-bottom: 10px; text-shadow: 2px 2px 10px rgba(0,0,0,0.3); }
+  .slide-1 .subtitle { font-size: 1.4em; margin-bottom: 25px; opacity: 0.95; }
+  .icon-big {
+    font-size: 3em; width: 110px; height: 110px; line-height: 110px;
+    background: rgba(255,255,255,0.15); border-radius: 50%;
+    display: inline-block; margin-bottom: 20px;
+    animation: bounce 2.5s infinite; backdrop-filter: blur(10px);
+  }
+  @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-15px)} }
+
+  /* Estructura de 3 zonas para evitar desajustes */
+  .slide-content {
+    background: white; border-radius: 20px; padding: 30px 40px;
+    max-width: 1150px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    height: 85vh; display: flex; flex-direction: column; overflow: hidden;
+  }
+  .slide-header { flex-shrink: 0; margin-bottom: 15px; }
+  .slide-main { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+  .slide-footer { flex-shrink: 0; margin-top: 15px; }
+
+  .slide-content h2 {
+    color: #667eea; font-size: 2em; margin-bottom: 10px;
+    border-bottom: 3px solid #f093fb; padding-bottom: 8px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .slide-content h2 i { color: #764ba2; font-size: 0.85em; }
+  .slide-content h3 { color: #764ba2; font-size: 1.3em; margin: 10px 0 8px; display: flex; align-items: center; gap: 8px; }
+  .slide-content p { font-size: 1.05em; line-height: 1.4; color: #333; margin-bottom: 8px; }
+
+  /* Cards */
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+  .card {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white; padding: 15px; border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15); transition: transform 0.3s;
+  }
+  .card:hover { transform: translateY(-5px) scale(1.02); }
+  .card .icon {
+    font-size: 1.5em; margin-bottom: 8px; width: 45px; height: 45px; line-height: 45px;
+    background: rgba(255,255,255,0.25); border-radius: 50%; text-align: center;
+  }
+  .card h4 { font-size: 1.1em; margin-bottom: 5px; }
+  .card p { color: rgba(255,255,255,0.95); font-size: 0.9em; margin: 0; line-height: 1.35; }
+  .card .autor { display:inline-block; margin-top:6px; font-size:0.75em; background:rgba(0,0,0,0.2); padding:2px 8px; border-radius:10px; }
+
+  .cards-blue .card { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+  .cards-orange .card { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+  .cards-green .card { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+  .cards-dark .card { background: linear-gradient(135deg, #30cfd0 0%, #330867 100%); }
+
+  /* Ciclo BML */
+  .cycle { display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap; gap: 15px; }
+  .cycle-step {
+    background: white; border: 3px solid #667eea; border-radius: 50%;
+    width: 130px; height: 130px; display: flex; flex-direction: column;
+    justify-content: center; align-items: center; text-align: center;
+    box-shadow: 0 8px 20px rgba(102,126,234,0.4); transition: all 0.3s;
+  }
+  .cycle-step:hover { transform: scale(1.08); background: #667eea; color: white; }
+  .cycle-step .big { font-size: 1.8em; color: #667eea; margin-bottom: 4px; }
+  .cycle-step:hover .big { color: white; }
+  .cycle-step strong { font-size: 1em; }
+  .cycle-step small { font-size: 0.75em; opacity: 0.8; }
+  .arrow { font-size: 1.8em; color: #f093fb; animation: pulse 1.6s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
+
+  /* Línea de tiempo histórica */
+  .timeline-h { display: flex; align-items: stretch; gap: 12px; flex-wrap: wrap; }
+  .era {
+    flex: 1; min-width: 180px; background: #f7f8ff; border-top: 4px solid #667eea;
+    border-radius: 10px; padding: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    transition: transform .3s;
+  }
+  .era:hover { transform: translateY(-4px); background: #eef0ff; }
+  .era .year { color: #764ba2; font-weight: bold; font-size: 1.2em; margin-bottom: 4px; }
+  .era h4 { color: #333; font-size: 1em; margin-bottom: 5px; }
+  .era p { font-size: 0.85em; color: #555; margin: 0; line-height: 1.35; }
+
+  /* Tablas */
+  table { width: 100%; border-collapse: collapse; font-size: 0.95em; }
+  th { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 10px; text-align: left; }
+  td { padding: 9px 10px; border-bottom: 1px solid #e8e8f5; color: #444; }
+  tr:nth-child(even) td { background: #fafaff; }
+  tr:hover td { background: #f0f2ff; }
+  td strong { color: #667eea; }
+
+  /* Timeline de fases */
+  .timeline { display: flex; flex-direction: column; gap: 10px; }
+  .phase {
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    color: white; padding: 12px 18px; border-radius: 12px;
+    display: flex; align-items: center; gap: 15px; transition: transform 0.3s;
+  }
+  .phase:hover { transform: translateX(8px); }
+  .phase-num {
+    background: white; color: #667eea; width: 40px; height: 40px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1em; font-weight: bold; flex-shrink: 0;
+  }
+  .phase-info { flex: 1; }
+  .phase-info h4 { font-size: 1.1em; margin-bottom: 3px; display: flex; align-items: center; gap: 8px; }
+  .phase-info p { color: rgba(255,255,255,0.95); font-size: 0.9em; margin: 0; line-height: 1.35; }
+  .phase-time {
+    background: rgba(255,255,255,0.28); padding: 4px 12px;
+    border-radius: 15px; font-weight: bold; white-space: nowrap; font-size: 0.9em;
+  }
+
+  /* Navegación */
+  .nav {
+    position: fixed; bottom: 15px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 12px; align-items: center; z-index: 100;
+    background: rgba(255,255,255,0.95); padding: 8px 20px; border-radius: 50px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+  }
+  .nav button {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white; border: none; width: 38px; height: 38px; border-radius: 50%;
+    cursor: pointer; font-size: 0.95em; transition: transform 0.2s;
+  }
+  .nav button:hover { transform: scale(1.15); }
+  .nav button:disabled { opacity: 0.4; cursor: not-allowed; }
+  .progress { font-weight: bold; color: #667eea; min-width: 75px; text-align: center; font-size: 0.95em; }
+
+  .progress-bar { position: fixed; top: 0; left: 0; height: 4px;
+    background: linear-gradient(90deg, #f093fb, #f5576c); transition: width 0.4s; z-index: 100; }
+
+  .quote {
+    background: #f8f9ff; border-left: 5px solid #667eea; padding: 12px 18px;
+    border-radius: 8px; font-size: 0.95em; color: #555; display: flex; align-items: center; gap: 10px;
+  }
+  .quote i { color: #667eea; font-size: 1.1em; flex-shrink: 0; }
+
+  .highlight { background: linear-gradient(120deg, #f093fb 0%, #f5576c 100%);
+    color: white; padding: 1px 8px; border-radius: 4px; font-weight: bold; }
+  .inline-icon { color: #667eea; margin-right: 5px; }
+
+  @media (max-width: 768px) {
+    .slide { padding: 15px; }
+    .slide-content { padding: 20px; }
+    .slide-1 h1 { font-size: 2em; }
+    .slide-content h2 { font-size: 1.5em; }
+    .cycle { flex-direction: column; }
+    .arrow { transform: rotate(90deg); }
+    table { font-size: 0.8em; }
+    th, td { padding: 6px; }
+  }
+
+/* Ajustes de proyección, accesibilidad y casos del proyecto integrador */
+.slide-content { max-width: 1200px; height: min(88vh, 830px); overflow-y:auto; }
+.slide-main { justify-content: center; min-height: 0; }
+.cards.cols-2 { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.card { background:linear-gradient(135deg,#7b4dc3,#6246a6); }
+.card-bright { background:linear-gradient(135deg,#e8509b,#c83783)!important; }
+.card-muted { background:linear-gradient(135deg,#516383,#384c70)!important; }
+.card p {font-size:1em;line-height:1.48;}
+.big-question {font-size:1.26em!important;line-height:1.5!important;text-align:center;margin:22px 4px 8px!important;font-weight:650;color:#343356!important;}
+.slide-content h2 {font-size:clamp(1.4rem,2.7vw,2rem)}
+.slide-content p {line-height:1.5;}
+.slide-content .slide-header p {font-size:1.08em}
+.nav button:focus-visible {outline:3px solid #e8509b;outline-offset:3px;}
+@media(max-width:700px){.cards.cols-2{grid-template-columns:1fr}.slide-content{height:87vh;padding:20px}.slide{padding:8px}.slide-main{justify-content:flex-start}.nav{bottom:6px}}
+@media(max-height:650px){.slide-content{height:82vh}.slide-main{justify-content:flex-start}}
+</style>
+<style>
+/* Mejoras de legibilidad para la sección de hipótesis */
+.slide-main table {font-size:clamp(.84rem,1.12vw,1rem)}
+.slide-main table td,.slide-main table th {padding:9px 12px;line-height:1.32}
+.slide-main .card-muted {background:linear-gradient(135deg,#4667a8,#334c83)}
+.slide-main .card-bright {background:linear-gradient(135deg,#7857bd,#6245a0)}
+.slide-content {overflow-y:auto}
+.nav button:focus-visible {outline:3px solid #141d56;outline-offset:3px}
+@media(max-height:720px){.slide-content{padding:17px 28px;height:86vh}.slide-content h2{font-size:1.6em}.slide-main table td,.slide-main table th{padding:6px 10px}}
+</style></head>
+<body>
+<div class="progress-bar" id="progressBar"></div>
+<div class="presentation">
+<!-- 1. PORTADA -->
+<div class="slide slide-1 active">
+<div class="icon-big"><i class="fa-solid fa-layer-group"></i></div>
+<h1>Filosofía Lean</h1>
+<p class="subtitle">Del Sistema de Producción Toyota a Lean Startup</p>
+<p style="font-size:1em; opacity:0.9;">
+<i class="fa-solid fa-arrow-right" style="color:white; margin-right:6px;"></i>
+      Navega con las flechas del teclado o los botones
+    </p>
+</div>
+<!-- 2. QUÉ SIGNIFICA LEAN -->
+<div class="slide">
+<div class="slide-content">
+<div class="slide-header">
+<h2><i class="fa-solid fa-book-open"></i> ¿Qué significa Lean?</h2>
+<p>Literalmente significa <span class="highlight">«esbelto»</span> o <span class="highlight">«sin grasa»</span>. En gestión describe prácticas que buscan <strong>maximizar el valor entregado al usuario con el menor desperdicio posible</strong>.</p>
+<h3>Cinco ideas centrales de esta filosofía</h3>
+</div>
+<div class="slide-main">
+<div class="cards cards-blue">
+<div class="card"><div class="icon"><i class="fa-solid fa-gem"></i></div><h4>Identificar el valor</h4><p>Definir qué considera valioso quien recibe el producto o servicio.</p></div>
+<div class="card"><div class="icon"><i class="fa-solid fa-scissors"></i></div><h4>Eliminar lo innecesario</h4><p>Quitar toda actividad que no aporta valor al usuario final.</p></div>
+<div class="card"><div class="icon"><i class="fa-solid fa-right-left"></i></div><h4>Mejorar el flujo</h4><p>Que el trabajo avance sin interrupciones, esperas ni cuellos de botella.</p></div>
+<div class="card"><div class="icon"><i class="fa-solid fa-clipboard-check"></i></div><h4>Aprender con evidencia</h4><p>Decidir con datos y observación real, no con suposiciones.</p></div>
+<div class="card"><div class="icon"><i class="fa-solid fa-arrows-rotate"></i></div><h4>Mejora continua</h4><p>Ajustar y perfeccionar de forma permanente, no una sola vez.</p></div>
+</div>
+</div>
+</div>
+</div>
+<!-- 3. ORIGEN -->
+<div class="slide">
+<div class="slide-content">
+<div class="slide-header">
+<h2><i class="fa-solid fa-clock-rotate-left"></i> Origen: el Sistema de Producción Toyota</h2>
+<p>Los antecedentes están en el <strong>Sistema de Producción Toyota (TPS)</strong>, desarrollado en Japón durante el siglo XX. El término <strong>«lean production»</strong> se difundió con John Krafcik (1988) y Womack, Jones y Roos (1990).</p>
+</div>
+<div class="slide-main">
+<div class="cards cards-dark" style="margin-bottom: 15px;">
+<div class="card"><div class="icon"><i class="fa-solid fa-user-gear"></i></div><h4>Taiichi Ohno</h4><p>Figura central del diseño del sistema.</p></div>
+<div class="card"><div class="icon"><i class="fa-solid fa-screwdriver-wrench"></i></div><h4>Shigeo Shingo</h4><p>Contribuyó con técnicas de mejora de procesos.</p></div>
+</div>
+<h3><i class="fa-solid fa-cubes"></i> Conceptos asociados al TPS</h3>
+<p><strong>Just in Time</strong> · <strong>Kaizen</strong> · <strong>Kanban</strong> · <strong>Jidoka</strong> · eliminación de desperdicios (<em>muda</em>)</p>
+</div>
+<div class="slide-footer">
+<div class="quote">
+<i class="fa-solid fa-circle-info"></i>
+<span>Toyota <strong>no llamaba «Lean Manufacturing»</strong> a su propio sistema. El término nació después, fuera de la empresa.</span>
+</div>
+</div>
+</div>
+</div>
+<!-- 4. CÓMO NACIÓ EL TÉRMINO -->
+<!-- 5. FAMILIA LEAN -->
+<div class="slide">
+<div class="slide-content">
+<div class="slide-header">
+<h2><i class="fa-solid fa-sitemap"></i> Los enfoques de la familia Lean</h2>
+<p>Cada enfoque aplica la misma filosofía a un terreno distinto:</p>
+</div>
+<div class="slide-main">
+<div class="cards">
+<div class="card"><div class="icon"><i class="fa-solid fa-industry"></i></div><h4>Lean Manufacturing</h4><p>Optimizar producción: menos defectos, esperas e inventario.</p><span class="autor">Toyota · Ohno · Womack y Jones</span></div>
+<div class="card"><div class="icon"><i class="fa-solid fa-building"></i></div><h4>Lean Management</h4><p>Aplicar los principios a la dirección y los procesos. Ej.: simplificar trámites universitarios.</p><span class="autor">Womack y Jones</span></div>
+<div class="card"><div class="icon"><i class="fa-solid fa-rocket"></i></div><h4>Lean Startup</h4><p>Comprobar con experimentos si una idea aporta valor, antes de invertir muchos recursos.</p><span class="autor">Eric Ries</span></div>
+<div class="card"><div class="icon"><i class="fa-solid fa-chart-column"></i></div><h4>Lean Analytics</h4><p>Elegir métricas relevantes para aprender y decidir.</p><span class="autor">Croll y Yoskovitz</span></div>
+<div class="card"><div class="icon"><i class="fa-solid fa-wand-magic-sparkles"></i></div><h4>Lean UX</h4><p>Probar hipótesis de experiencia de usuario en ciclos cortos.</p><span class="autor">Gothelf y Seiden</span></div>
+<div class="card"><div class="icon"><i class="fa-solid fa-code"></i></div><h4>Lean Software Dev.</h4><p>Reducir desperdicio y optimizar la entrega de software.</p><span class="autor">Mary y Tom Poppendieck</span></div>
+</div>
+</div>
+</div>
+</div>
+<!-- 6. PREGUNTA DE CADA ENFOQUE -->
+<div class="slide">
+<div class="slide-content">
+<div class="slide-header">
+<h2><i class="fa-solid fa-circle-question"></i> La pregunta que responde cada enfoque</h2>
+<p>Estos enfoques y marcos responden preguntas distintas. Scrum no es un enfoque Lean; Kanban tiene vínculos históricos con Toyota y también se utiliza en gestión de trabajo.</p>
+</div>
+<div class="slide-main">
+<table>
+<tr><th>Enfoque</th><th>Pregunta principal</th></tr>
+<tr><td><strong>Lean Startup</strong></td><td>¿Cómo validamos que la solución genera valor?</td></tr>
+<tr><td><strong>Lean Analytics</strong></td><td>¿Qué evidencia cuantitativa muestra resultados?</td></tr>
+<tr><td><strong>Lean UX</strong></td><td>¿La experiencia que diseñamos es usable y deseable?</td></tr>
+<tr><td><strong>Scrum</strong></td><td>¿Cómo organizar el desarrollo iterativo de un producto?</td></tr>
+<tr><td><strong>Kanban</strong></td><td>¿Cómo visualizar y gestionar el flujo de trabajo?</td></tr>
+<tr><td><strong>Lean Manufacturing</strong></td><td>¿Cómo producir eficazmente y reducir desperdicios?</td></tr>
+</table>
+</div>
+<div class="slide-footer">
+<div class="quote">
+<i class="fa-solid fa-lightbulb"></i>
+<span><strong>En síntesis:</strong> Lean es una filosofía de gestión y mejora; Agile reúne valores y principios para desarrollar productos y responder al cambio. Pueden integrarse, pero <strong>ninguno sustituye automáticamente a los otros</strong>.</span>
+</div>
+</div>
+</div>
+</div>
+<!-- 7. LEAN STARTUP -->
+<div class="slide">
+<div class="slide-content">
+<div class="slide-header">
+<h2><i class="fa-solid fa-rocket"></i> Lean Startup: construir, medir, aprender</h2>
+<p>Eric Ries (2011): experimentar para reducir la incertidumbre y aprender qué vale la pena desarrollar.</p>
+</div>
+<div class="slide-main">
+<div class="quote" style="margin-bottom: 20px;">
+<i class="fa-solid fa-quote-left"></i>
+<span>Su pregunta no es «¿cómo producir más eficientemente?», sino <strong>«¿cómo comprobar que vale la pena construir este producto?»</strong></span>
+</div>
+<div class="cycle">
+<div class="cycle-step"><div class="big"><i class="fa-solid fa-screwdriver-wrench"></i></div><strong>CONSTRUIR</strong><small>MVP</small></div>
+<div class="arrow"><i class="fa-solid fa-arrow-right"></i></div>
+<div class="cycle-step"><div class="big"><i class="fa-solid fa-chart-column"></i></div><strong>MEDIR</strong><small>Usuarios reales</small></div>
+<div class="arrow"><i class="fa-solid fa-arrow-right"></i></div>
+<div class="cycle-step"><div class="big"><i class="fa-solid fa-brain"></i></div><strong>APRENDER</strong><small>Evidencia</small></div>
+</div>
+<p style="text-align:center; margin-top: 18px;">Partimos de una <strong>hipótesis comprobable</strong>; creamos un <strong>MVP</strong>, medimos lo que hacen los usuarios y decidimos si <strong>perseverar, ajustar o pivotar</strong>. El ciclo se repite.</p>
+</div>
+<div class="slide-footer">
+<div class="cards cards-green">
+<div class="card"><h4><i class="fa-solid fa-shield-halved"></i> Perseverar</h4><p>La hipótesis se sostuvo: seguimos mejorando y escalando.</p></div>
+<div class="card"><h4><i class="fa-solid fa-arrows-rotate"></i> Pivotar</h4><p>La evidencia la contradijo: cambiamos de dirección.</p></div>
+</div>
+</div>
+</div>
+</div>
+<!-- 8. EJEMPLO TIC -->
+<div class="slide"><div class="slide-content"><div class="slide-header"><h2>El reto: crear un videojuego</h2><p>Imaginen su <strong>Proyecto Integrador</strong>: un videojuego de aventuras donde se resuelven acertijos para pasar de nivel.</p></div><div class="slide-main"><div class="cards cols-2"><div class="card card-muted"><h4>Construir todo primero</h4><p>Programar durante meses personajes, escenarios, sonidos y cinco niveles… sin saber si a alguien le resulta divertido.</p></div><div class="card card-bright"><h4>Aprender antes de ampliar</h4><p>Probar una versión jugable pequeña, observar jugadores reales y mejorar lo que importa antes de crear los demás niveles.</p></div></div><h3>Pregunta inicial</h3><p class="big-question">¿Cómo sabremos si nuestro videojuego es atractivo <em>antes</em> de desarrollar todas sus funciones?</p></div><div class="slide-footer"><div class="quote"><strong>Lean Startup:</strong> no se trata solo de gastar menos, sino de reducir la incertidumbre con evidencia.</div></div></div></div>
+<!-- 9. LEAN ANALYTICS -->
+<div class="slide"><div class="slide-content"><div class="slide-header"><h2>Medir lo que importa</h2><p>Lean Analytics (Croll y Yoskovitz, 2013) complementa la experimentación: elegir métricas que ayuden a decidir.</p></div><div class="slide-main"><table><tr><th>Métrica del videojuego</th><th>¿Qué nos dice?</th></tr><tr><td><strong>Jugadores que comienzan</strong></td><td>Cuántas personas realmente prueban el prototipo.</td></tr><tr><td><strong>Jugadores que terminan el nivel</strong></td><td>Si el reto se puede completar.</td></tr><tr><td><strong>Tiempo y punto de abandono</strong></td><td>Dónde aparece confusión o dificultad excesiva.</td></tr><tr><td><strong>Jugadores que desean continuar</strong></td><td>Si hay señales de interés en jugar otro nivel.</td></tr></table><p style="margin-top:14px;"><strong>Eviten métricas de vanidad:</strong> el número de personas que vio el anuncio no prueba que el juego sea divertido.</p></div><div class="slide-footer"><div class="quote">Definan <strong>antes de probar</strong> cómo reconocerán un resultado favorable.</div></div></div></div>
+<!-- 10. OTROS ENFOQUES -->
+<div class="slide">
+<div class="slide-content">
+<div class="slide-header">
+<h2><i class="fa-solid fa-shapes"></i> Más allá del software</h2>
+<p>La filosofía Lean se ha aplicado a muchos otros campos:</p>
+</div>
+<div class="slide-main">
+<div class="cards cards-orange">
+<div class="card"><div class="icon"><i class="fa-solid fa-hospital"></i></div><h4>Lean Healthcare</h4><p>Optimización de procesos hospitalarios.</p></div>
+<div class="card"><div class="icon"><i class="fa-solid fa-helmet-safety"></i></div><h4>Lean Construction</h4><p>Gestión de proyectos de construcción.</p></div>
+<div class="card"><div class="icon"><i class="fa-solid fa-file-signature"></i></div><h4>Lean Office</h4><p>Administración y trámites sin desperdicio.</p></div>
+<div class="card"><div class="icon"><i class="fa-solid fa-chart-line"></i></div><h4>Lean Six Sigma</h4><p>Combina reducción de desperdicios y de variación.</p></div>
+<div class="card"><div class="icon"><i class="fa-solid fa-boxes-stacked"></i></div><h4>Lean Product Mgmt.</h4><p>Gestión de productos orientada a resultados.</p></div>
+</div>
+</div>
+<div class="slide-footer">
+<div class="quote">
+<i class="fa-solid fa-circle-info"></i>
+<span><strong>No todos tienen un único fundador</strong> ni una definición universal.</span>
+</div>
+</div>
+</div>
+</div>
+<!-- 11. LIBROS Y RUTA -->
+<div class="slide">
+<div class="slide-content">
+<div class="slide-header">
+<h2><i class="fa-solid fa-book"></i> Libros fundamentales y ruta de estudio</h2>
+</div>
+<div class="slide-main">
+<table style="margin-bottom: 15px;">
+<tr><th>Obra</th><th>Autor(es)</th><th>Año</th></tr>
+<tr><td><em>The Machine That Changed the World</em></td><td>Womack, Jones y Roos</td><td>1990</td></tr>
+<tr><td><em>Lean Thinking</em></td><td>Womack y Jones</td><td>1996</td></tr>
+<tr><td><em>The Lean Startup</em></td><td>Eric Ries</td><td>2011</td></tr>
+<tr><td><em>Lean Analytics</em></td><td>Croll y Yoskovitz</td><td>2013</td></tr>
+<tr><td><em>Lean UX</em></td><td>Gothelf, con Seiden</td><td>2013</td></tr>
+</table>
+<h3><i class="fa-solid fa-compass"></i> Ruta sugerida para TIC</h3>
+<div class="cards cards-blue">
+<div class="card"><div class="icon">1</div><h4>Lean Thinking</h4><p>Comprender los principios generales.</p></div>
+<div class="card"><div class="icon">2</div><h4>Lean Startup</h4><p>Validar ideas antes de programar.</p></div>
+<div class="card"><div class="icon">3</div><h4>Lean Analytics</h4><p>Interpretar métricas de producto.</p></div>
+<div class="card"><div class="icon">4</div><h4>Lean UX</h4><p>Diseñar y probar interfaces centradas en usuarios.</p></div>
+</div>
+</div>
+</div>
+</div>
+<!-- 12. EJEMPLO INTEGRADOR -->
+<div class="slide"><div class="slide-content"><div class="slide-header"><h2>¿Cómo se complementan las metodologías?</h2><p>Pueden combinar lo aprendido en otras asignaturas al desarrollar el videojuego.</p></div><div class="slide-main"><table><tr><th>Enfoque</th><th>Aplicación al videojuego</th></tr><tr><td><strong>Design Thinking</strong></td><td>Comprender a los jugadores y definir qué experiencia buscan.</td></tr><tr><td><strong>Lean Startup</strong></td><td>Probar la hipótesis de diversión con un MVP.</td></tr><tr><td><strong>Lean Analytics</strong></td><td>Medir terminación, abandono e interés en continuar.</td></tr><tr><td><strong>Scrum</strong></td><td>Organizar el desarrollo iterativo mediante sprints.</td></tr><tr><td><strong>Kanban</strong></td><td>Visualizar tareas por hacer, en curso, en prueba y terminadas.</td></tr></table></div><div class="slide-footer"><div class="quote">Cada uno tiene una función distinta: <strong>no son sinónimos</strong>.</div></div></div></div>
+<!-- 13. EJERCICIO 2 HORAS -->
+<div class="slide"><div class="slide-content"><div class="slide-header"><h2>De la idea a una hipótesis</h2><p>Una idea propone algo; una hipótesis expresa una predicción que podemos poner a prueba.</p></div><div class="slide-main"><div class="cards cols-2"><div class="card card-muted"><h4>IDEA</h4><p>«Haremos un videojuego de aventuras con acertijos».</p></div><div class="card card-bright"><h4>HIPÓTESIS</h4><p>«De 10 estudiantes que prueben el primer nivel, al menos 7 lo completarán y al menos 6 querrán jugar el siguiente».</p></div></div><p class="big-question">¿Qué observaríamos para saber si nuestra hipótesis se sostiene?</p></div><div class="slide-footer"><div class="quote">Los umbrales son <strong>ejemplos didácticos</strong>; cada equipo debe justificarlos antes de observar resultados.</div></div></div></div><div class="slide"><div class="slide-content"><div class="slide-header"><h2>¿Las hipótesis deben llevar números?</h2><p>No. En Lean Startup podemos comprobar <strong>hipótesis cualitativas y cuantitativas</strong>. Lo fundamental es contar con evidencia, no inventar un porcentaje.</p></div><div class="slide-main"><div class="cards cols-2"><div class="card card-bright"><h4>Cualitativa · comprender</h4><p>«Los jugadores perciben las instrucciones de los acertijos como confusas».</p><p><strong>Prueba:</strong> observar sesiones y preguntar dónde se perdieron.</p></div><div class="card"><h4>Cuantitativa · medir</h4><p>«Una mayoría de jugadores terminará el primer nivel sin ayuda».</p><p><strong>Prueba:</strong> contar cuántos lo logran; fijar antes un umbral de éxito.</p></div></div><p class="big-question">También podemos combinar ambas: ¿cuántos terminan el nivel y por qué otros abandonan?</p></div><div class="slide-footer"><div class="quote">Eric Ries prioriza el <strong>aprendizaje validado</strong> y las métricas útiles, pero no exige que toda hipótesis contenga números.</div></div></div></div><div class="slide"><div class="slide-content"><div class="slide-header"><h2>Cuatro piezas que NO son lo mismo</h2><p>Separar la suposición de la forma de comprobarla ayuda a diseñar una validación rigurosa.</p></div><div class="slide-main"><table><tr><th>Elemento</th><th>Ejemplo aplicado al videojuego</th></tr><tr><td><strong>Hipótesis</strong></td><td>«Los nuevos jugadores podrán terminar el primer nivel sin ayuda».</td></tr><tr><td><strong>Experimento</strong></td><td>Observar a 10 estudiantes que no conozcan el juego mientras prueban el MVP.</td></tr><tr><td><strong>Métrica</strong></td><td>Porcentaje de participantes que terminan el nivel sin ayuda.</td></tr><tr><td><strong>Criterio de éxito</strong></td><td>Que al menos 7 de los 10 lo completen (umbral ilustrativo).</td></tr></table><p style="margin-top:15px;">Una <strong>entrevista</strong> puede aportar evidencia cualitativa; una <strong>prueba de tareas</strong> puede combinar observaciones y conteos.</p></div><div class="slide-footer"><div class="quote">El equipo define y <strong>justifica el umbral antes de la prueba</strong>. Diez usuarios son útiles para explorar, no para demostrar conclusiones universales.</div></div></div></div><div class="slide"><div class="slide-content"><div class="slide-header"><h2>Ejemplos de hipótesis: videojuegos</h2><p>Observen que cada una anticipa algo que puede examinarse con usuarios reales.</p></div><div class="slide-main"><table><tr><th>Área</th><th>Hipótesis para poner a prueba</th><th>Evidencia posible</th></tr><tr><td><strong>Instrucciones</strong></td><td>Los principiantes comprenderán cómo moverse sin explicación del docente.</td><td>Observación y preguntas.</td></tr><tr><td><strong>Dificultad</strong></td><td>Al menos 6 de 10 jugadores resolverán el segundo acertijo sin pistas.</td><td>Registro de éxito.</td></tr><tr><td><strong>Diversión</strong></td><td>Los jugadores describirán el primer nivel como entretenido y explicarán por qué.</td><td>Entrevistas breves.</td></tr><tr><td><strong>Interfaz</strong></td><td>Los jugadores identificarán la función del botón de pausa sin ayuda.</td><td>Prueba de usabilidad.</td></tr><tr><td><strong>Continuidad</strong></td><td>Al menos 7 de 10 participantes elegirán probar un segundo nivel.</td><td>Elección observada.</td></tr><tr><td><strong>Accesibilidad</strong></td><td>El texto de instrucciones será legible para quienes prueben el juego en celular.</td><td>Observación y comentarios.</td></tr></table></div><div class="slide-footer"><div class="quote">Las hipótesis son <strong>propuestas didácticas</strong>, no verdades comprobadas. «Me gusta» por sí solo no demuestra una buena experiencia de juego.</div></div></div></div><div class="slide"><div class="slide-content"><div class="slide-header"><h2>Ejercicio: conviertan ideas en hipótesis</h2><p>En parejas, transformen cada propuesta vaga en una afirmación que puedan comprobar.</p></div><div class="slide-main"><div class="cards cols-2"><div class="card card-muted"><h4>Reto A · Jugabilidad</h4><p>«Nuestro videojuego será fácil de usar».</p><p>¿Quién lo probará? ¿Qué tarea hará?</p></div><div class="card card-muted"><h4>Reto B · Diversión</h4><p>«Los acertijos serán muy entretenidos».</p><p>¿Qué observarían además de una opinión?</p></div><div class="card card-muted"><h4>Reto C · Dificultad</h4><p>«El jefe final estará bien diseñado».</p><p>¿Cómo detectar frustración o reto apropiado?</p></div><div class="card card-muted"><h4>Reto D · Retención</h4><p>«Todos querrán seguir jugando».</p><p>¿Qué comportamiento indicaría continuidad?</p></div></div><p style="margin-top:14px;"><strong>Entregable:</strong> por cada reto, redacten 1 hipótesis, 1 experimento, 1 métrica o registro cualitativo y 1 criterio para decidir.</p></div><div class="slide-footer"><div class="quote">Tiempo sugerido: <strong>15 minutos</strong>. No necesitan programar todavía: primero deben definir qué pretenden aprender.</div></div></div></div><div class="slide"><div class="slide-content"><div class="slide-header"><h2>Posibles respuestas: ¿son comprobables?</h2><p>Estas son alternativas, no las únicas respuestas correctas. Compárenlas con sus propuestas.</p></div><div class="slide-main"><table><tr><th>Reto</th><th>Hipótesis mejor formulada</th><th>Cómo comprobarla</th></tr><tr><td><strong>A</strong></td><td>Los jugadores nuevos encontrarán el control de movimiento sin instrucciones adicionales.</td><td>Observar 5 pruebas y anotar dudas.</td></tr><tr><td><strong>B</strong></td><td>Los jugadores querrán intentar un acertijo adicional tras resolver el primero.</td><td>Ofrecer un acertijo opcional y registrar la elección.</td></tr><tr><td><strong>C</strong></td><td>Los jugadores describirán el jefe final como desafiante, pero comprensible.</td><td>Observar intentos; entrevistar al finalizar.</td></tr><tr><td><strong>D</strong></td><td>Al menos 6 de 10 jugadores elegirán empezar el nivel 2 cuando se les ofrezca.</td><td>Registrar elecciones, sin presionar.</td></tr></table><p style="margin-top:12px;"><strong>Discusión:</strong> ¿qué respuestas usan evidencia de comportamiento?, ¿cuáles requieren entrevistas?, ¿qué umbrales justificarían?</p></div><div class="slide-footer"><div class="quote">Una hipótesis cualitativa puede estar bien planteada <strong>sin porcentaje</strong>, siempre que especifiquen qué observaciones la respaldarían o cuestionarían.</div></div></div></div><div class="slide"><div class="slide-content"><div class="slide-header"><h2>Construir: un MVP del videojuego</h2><p>MVP significa <strong>producto mínimo viable</strong>: la versión más sencilla que permite obtener aprendizaje útil.</p></div><div class="slide-main"><div class="cards cols-2"><div class="card"><h4>Incluir</h4><p>Un personaje controlable, un escenario, tres acertijos, instrucciones y una meta.</p></div><div class="card card-muted"><h4>Posponer</h4><p>Cinco niveles, tienda de objetos, multijugador, animaciones complejas y efectos decorativos.</p></div></div><p class="big-question">El MVP debe ser suficiente para comprobar si la mecánica central es comprensible e interesante.</p></div><div class="slide-footer"><div class="quote">Un boceto sirve para probar comprensión de pantallas; para medir <strong>diversión al jugar</strong>, necesitan una experiencia jugable representativa.</div></div></div></div><div class="slide"><div class="slide-content"><div class="slide-header"><h2>Medir: prueba con jugadores reales</h2><p>Supongamos que 10 estudiantes aceptan participar en una prueba piloto del primer nivel.</p></div><div class="slide-main"><div class="cards cols-2"><div class="card card-bright"><h4>8 de 10</h4><p>Comenzaron a jugar.</p></div><div class="card"><h4>5 de 8</h4><p>Terminaron el nivel.</p></div><div class="card"><h4>3 de 8</h4><p>Dijeron que querían continuar.</p></div><div class="card card-muted"><h4>6 de 8</h4><p>Se confundieron con las instrucciones.</p></div></div><p style="margin-top:12px;">Registren <strong>quiénes fueron invitados</strong> y <strong>quiénes jugaron</strong>. No mezclen denominadores al reportar porcentajes.</p></div><div class="slide-footer"><div class="quote">Estos números son un <strong>ejemplo hipotético</strong>, no resultados reales del grupo.</div></div></div></div><div class="slide"><div class="slide-content"><div class="slide-header"><h2>Aprender: ¿qué decisión tomarían?</h2><p>Con los resultados hipotéticos, la hipótesis inicial no queda respaldada: solo 5 completaron el nivel y 3 desean continuar.</p></div><div class="slide-main"><div class="cards cols-2"><div class="card card-bright"><h4>¿Qué harían ahora?</h4><p>Mejorar instrucciones, ajustar los acertijos y repetir la prueba con nuevos jugadores.</p></div><div class="card card-muted"><h4>¿Qué evitarían?</h4><p>Programar otros cinco niveles sin investigar por qué abandonan el primero.</p></div></div><p class="big-question">Perseverar: mantener la dirección. Pivotar: cambiar una hipótesis importante del producto. Ajustar instrucciones no siempre implica pivotar.</p></div><div class="slide-footer"><div class="quote">Pocos participantes permiten detectar problemas iniciales, pero <strong>no prueban</strong> el éxito del producto en todo su mercado.</div></div></div></div><div class="slide"><div class="slide-content"><div class="slide-header"><h2>Actividad: primera prueba de su videojuego</h2><p>En equipos, diseñen una validación pequeña para su Proyecto Integrador.</p></div><div class="slide-main"><div class="timeline"><div class="phase"><div class="phase-num">1</div><div class="phase-info"><h4>Redacten una hipótesis · 15 min</h4><p>Definan jugadores objetivo, comportamiento esperado y criterio para evaluar.</p></div></div><div class="phase"><div class="phase-num">2</div><div class="phase-info"><h4>Diseñen su MVP · 25 min</h4><p>Un nivel jugable o prototipo interactivo: personaje, tres acertijos y meta clara.</p></div></div><div class="phase"><div class="phase-num">3</div><div class="phase-info"><h4>Planeen o realicen pruebas · 45 min</h4><p>Prueben con 5 jugadores externos al equipo y registren comportamientos observables.</p></div></div><div class="phase"><div class="phase-num">4</div><div class="phase-info"><h4>Analicen y presenten · 35 min</h4><p>Concluyan qué mantendrán, modificarán o volverán a probar. Presentación: 2 minutos.</p></div></div></div></div><div class="slide-footer"><div class="quote">Tiempo estimado: <strong>120 minutos</strong>. Si no tienen MVP funcional, diseñen hoy el protocolo y prueben posteriormente.</div></div></div></div>
+<!-- 14. PLANTILLA -->
+<div class="slide"><div class="slide-content"><div class="slide-header"><h2>Ficha de validación para entregar</h2><p>Cada equipo documentará el aprendizaje logrado, no solo su opinión sobre el videojuego.</p></div><div class="slide-main"><div class="cards cols-2"><div class="card"><h4>1 · Jugador objetivo</h4><p>¿Para quién está diseñado el juego?</p></div><div class="card"><h4>2 · Hipótesis y criterio</h4><p>¿Qué suposición comprobaremos? ¿Qué evidencia o criterio usaríamos?</p></div><div class="card"><h4>3 · MVP y prueba</h4><p>¿Qué incluye el nivel? ¿Qué instrucciones recibieron?</p></div><div class="card"><h4>4 · Resultados</h4><p>Conteos y observaciones: terminación, dificultades, comentarios y continuidad.</p></div><div class="card"><h4>5 · Interpretación</h4><p>¿La evidencia respalda la hipótesis? ¿Qué limitaciones hay?</p></div><div class="card"><h4>6 · Próxima decisión</h4><p>¿Perseverar, ajustar o pivotar? Justifiquen la decisión.</p></div></div></div><div class="slide-footer"><div class="quote">Evaluaremos <strong>claridad de hipótesis, prueba, evidencia y justificación</strong>; no gana automáticamente quien tenga el videojuego más elaborado.</div></div></div></div>
+<!-- 15. CIERRE -->
+<div class="slide slide-1">
+<div class="icon-big"><i class="fa-solid fa-graduation-cap"></i></div>
+<h1 style="font-size:2.8em;">Crear valor,<br/>eliminar desperdicio</h1>
+<p class="subtitle" style="font-size:1.2em;">«La pregunta correcta no es cómo producir más,<br/>sino si vale la pena construirlo».</p>
+<div style="margin-top:25px; font-size:1.05em; text-align:left; display:inline-block;">
+<i class="fa-solid fa-book-open" style="margin-right:6px;"></i><strong>Para profundizar</strong><br/>
+      • <em>Lean Thinking</em> — Womack y Jones<br/>
+      • <em>The Lean Startup</em> — Eric Ries<br/>
+      • <em>Lean Analytics</em> — Croll y Yoskovitz
+    </div>
+<p style="margin-top:20px; font-size:1.3em;"><i class="fa-solid fa-hands-clapping" style="margin-right:8px;"></i>Gracias</p>
+</div>
+</div>
+<div class="nav">
+<button id="prevBtn" onclick="changeSlide(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+<span class="progress" id="progress">1 / 15</span>
+<button id="nextBtn" onclick="changeSlide(1)"><i class="fa-solid fa-chevron-right"></i></button>
+</div>
+<script>
+  const slides = document.querySelectorAll('.slide');
+  let current = 0;
+  const total = slides.length;
+
+  function showSlide(i) {
+    slides.forEach(s => s.classList.remove('active'));
+    slides[i].classList.add('active');
+    document.getElementById('progress').textContent = (i+1) + ' / ' + total;
+    document.getElementById('progressBar').style.width = (((i+1)/total)*100) + '%';
+    document.getElementById('prevBtn').disabled = (i === 0);
+    document.getElementById('nextBtn').disabled = (i === total - 1);
+  }
+
+  function changeSlide(dir) {
+    const next = current + dir;
+    if (next >= 0 && next < total) { current = next; showSlide(current); }
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ') changeSlide(1);
+    if (e.key === 'ArrowLeft') changeSlide(-1);
+  });
+
+  showSlide(0);
+</script>
+</body>
+</html>
